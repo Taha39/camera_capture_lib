@@ -7,15 +7,16 @@ using namespace cv;
 namespace camera {
 	bool capture_cam::init(int width, int height, int fps) {
 		if (!cap_.open(0))
-			return start_;
+			return false;
 
-		
-		cap_.set(cv::CAP_PROP_FRAME_WIDTH, width);
-		cap_.set(cv::CAP_PROP_FRAME_HEIGHT, height);
-		cap_.set(cv::CAP_PROP_FPS, fps);
-		start_ = true;
-				
-		return start_;
+		bool ret = true;
+		ret &= cap_.set(cv::CAP_PROP_FRAME_WIDTH, width);
+		assert(ret);
+		ret &= cap_.set(cv::CAP_PROP_FRAME_HEIGHT, height);
+		assert(ret);
+		ret &= cap_.set(cv::CAP_PROP_FPS, fps);
+		assert(ret);
+		return ret;
 	};
 
 	void capture_cam::run(custom_capture::capture_callback* callback){
@@ -44,11 +45,22 @@ namespace camera {
 	}
 
 	void capture_cam::start(custom_capture::capture_callback* callback) {
-		std::thread thread_object(&capture_cam::run, this, callback);
-		thread_object.detach();
+		assert(t_.joinable() == false);
+		assert(start_ == false);
+		start_ = true;
+	
+		t_ = std::thread{ &capture_cam::run, this, callback };
+		
 	}
 
 	
+	void capture_cam::stop() {
+		assert(start_);
+		assert(t_.joinable());
+		start_ = false;
+
+		t_.join();
+	}
 
 	/*class mycapture : public custom_capture::capture_callback {
 	public:

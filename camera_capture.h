@@ -8,9 +8,11 @@ namespace camera {
 	public:
 		bool init(int width, int height, int fps) override;
 		void start(custom_capture::capture_callback* callback) override;
+		void stop() override;
 	
 	private:
 		void run(custom_capture::capture_callback* callback);
+		std::thread t_;
 
 	public:
 		cv::VideoCapture cap_;
