@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 
 set(OPENCV_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/opencv411_vc15/include)
 set(OPENCV_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/opencv411_vc15/lib)
+add_definitions(/ZI)
 
 add_library(cam_capture 
 	Capturer.h

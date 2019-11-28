@@ -5,9 +5,11 @@
 using namespace cv;
 
 namespace camera {
-	bool capture_cam::init(int width, int height, int fps) {
+	bool capture_cam::init(int width, int height, int fps, custom_capture::raw_format format) {
 		if (!cap_.open(0))
 			return false;
+
+		format_ = format;
 
 		bool ret = true;
 		ret &= cap_.set(cv::CAP_PROP_FRAME_WIDTH, width);
@@ -25,18 +27,24 @@ namespace camera {
 			cap_ >> frame;
 			if (frame.empty()) break; // end of video stream
 
-			cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
-
-			int size = frame.total() * frame.elemSize();
-			custom_capture::frame_data frame_detail;
-			
 			int w = frame.size().width;
 			int h = frame.size().height;
 
-			frame_detail.buffer.resize(w * h * 3);
+			int buf_size{ 0 };
+			if (format_ == custom_capture::raw_format::YV12) {
+				cv::cvtColor(frame, frame, cv::COLOR_BGR2YUV_I420);
+				buf_size = (w * h * 3) / 2;
+			}
+			else if (format_ == custom_capture::raw_format::RGB) {
+				cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
+				buf_size = (w * h * 3);
+			}
+			
+			custom_capture::frame_data frame_detail;
+			frame_detail.buffer.resize(buf_size);
 			
 			memcpy(frame_detail.buffer.data(), frame.data, frame_detail.buffer.size());
-			frame_detail.format = custom_capture::raw_format::RGB;
+			frame_detail.format = format_;
 			frame_detail.w = w;
 			frame_detail.h = h;
 

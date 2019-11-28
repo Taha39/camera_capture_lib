@@ -29,7 +29,7 @@ namespace custom_capture {
 	class capturer {
 	public:
 		virtual ~capturer() {}
-		virtual bool init(int width, int height, int fps) = 0;
+		virtual bool init(int width, int height, int fps, raw_format format) = 0;
 		virtual void start(capture_callback* callback) = 0;
 		virtual void stop() = 0;
 	};
